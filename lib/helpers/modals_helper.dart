@@ -8,7 +8,7 @@ class ModalsHelper {
           SnackBar(
               behavior: SnackBarBehavior.floating,
               backgroundColor: backgroundColor,
-              duration: Duration(seconds: 1),
+              duration: Duration(seconds: 2),
               content: Text(
                 message,
                 style: TextStyle(

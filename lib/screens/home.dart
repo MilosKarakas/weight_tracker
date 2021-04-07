@@ -16,104 +16,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool? _gaining;
-  bool _showFloatingActionButton = true;
+  bool _bottomSheetVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.deepPurple,
-      body: Center(
-        child: StreamBuilder<List<WeightModel>>(
-            stream: dataStream(),
-            builder: (context, snapshot) {
-              if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                _gaining = _gainingWeight(snapshot.data!);
-                return ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 64.0, bottom: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Hi!',
-                            style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 28.0,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white),
-                          ),
-                          IconButton(
-                              icon: Icon(
-                                Icons.login_outlined,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => signOut(context))
-                        ],
-                      ),
-                    ),
-                    if (_gaining != null)
-                      Row(
-                        children: [
-                          Text(
-                            'Your weight is currently going ',
-                            style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          ),
-                          SizedBox(
-                            width: 4.0,
-                          ),
-                          if (_gaining!)
-                            Icon(
-                              Icons.trending_up,
-                              color: Colors.green[600],
-                            ),
-                          if (!_gaining!)
-                            Icon(
-                              Icons.trending_down,
-                              color: Colors.red[700],
-                            )
-                        ],
-                      ),
-                    SizedBox(
-                      height: 16.0,
-                    ),
-                    Text(
-                      'These are your weight entries (Tap to edit or delete them):',
-                      style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    ),
-                    SizedBox(
-                      height: 16.0,
-                    ),
-                    Container(
-                        margin: EdgeInsets.only(bottom: 16.0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(
-                                color: Colors.deepPurple.shade400, width: 2.0)),
-                        child: Column(
-                          children: List.generate(
-                              snapshot.data!.length,
-                              (index) => WeightListTile(snapshot.data![index],
-                                  index == snapshot.data!.length - 1)),
-                        )),
-                  ],
-                );
-              }
-
-              return ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  children: <Widget>[
-                    Padding(
+    return GestureDetector(
+      onTap: () {
+        if (_bottomSheetVisible) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: Center(
+          child: StreamBuilder<List<WeightModel>>(
+              stream: dataStream(),
+              builder: (context, snapshot) {
+                if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+                  _gaining = _gainingWeight(snapshot.data!);
+                  return ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    children: <Widget>[
+                      Padding(
                         padding: EdgeInsets.only(top: 64.0, bottom: 16.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -134,38 +58,122 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 onPressed: () => signOut(context))
                           ],
-                        )),
-                    Text(
-                      "You don't have any entries yet. Use the floating action button at the bottom to insert new entries.",
-                      style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    )
-                  ]);
-            }),
+                        ),
+                      ),
+                      if (_gaining != null)
+                        Row(
+                          children: [
+                            Text(
+                              'Your weight is currently going ',
+                              style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white),
+                            ),
+                            SizedBox(
+                              width: 4.0,
+                            ),
+                            if (_gaining!)
+                              Icon(
+                                Icons.trending_up,
+                                color: Colors.green[600],
+                              ),
+                            if (!_gaining!)
+                              Icon(
+                                Icons.trending_down,
+                                color: Colors.red[700],
+                              )
+                          ],
+                        ),
+                      SizedBox(
+                        height: 16.0,
+                      ),
+                      Text(
+                        'These are your weight entries (Tap to edit or delete them):',
+                        style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      ),
+                      SizedBox(
+                        height: 16.0,
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(bottom: 16.0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(
+                                  color: Colors.deepPurple.shade400,
+                                  width: 2.0)),
+                          child: Column(
+                            children: List.generate(
+                                snapshot.data!.length,
+                                (index) => WeightListTile(snapshot.data![index],
+                                    index == snapshot.data!.length - 1)),
+                          )),
+                    ],
+                  );
+                }
+
+                return ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(top: 64.0, bottom: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Hi!',
+                                style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 28.0,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white),
+                              ),
+                              IconButton(
+                                  icon: Icon(
+                                    Icons.login_outlined,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () => signOut(context))
+                            ],
+                          )),
+                      Text(
+                        "You don't have any entries yet. Use the floating action button at the bottom to insert new entries.",
+                        style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      )
+                    ]);
+              }),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+        ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterFloat,
+        floatingActionButton: !_bottomSheetVisible
+            ? Builder(
+                builder: (context) => FloatingActionButton(
+                  tooltip: 'Add new',
+                  onPressed: () => addWeight(context),
+                  child: Icon(Icons.add),
+                ),
+              )
+            : null, // This trailing comma makes auto-formatting nicer for build methods.
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-      ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterFloat,
-      floatingActionButton: _showFloatingActionButton
-          ? Builder(
-              builder: (context) => FloatingActionButton(
-                tooltip: 'Add new',
-                onPressed: () => addWeight(context),
-                child: Icon(Icons.add),
-              ),
-            )
-          : null, // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
   void changeFloatingActionButtonVisibillity() {
     setState(() {
-      _showFloatingActionButton = !_showFloatingActionButton;
+      _bottomSheetVisible = !_bottomSheetVisible;
     });
   }
 
