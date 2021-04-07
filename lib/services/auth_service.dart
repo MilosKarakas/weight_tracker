@@ -9,9 +9,12 @@ class AuthService {
 
   Future<UserCredential?> signUp(
       BuildContext context, String email, String password) async {
+    ModalsHelper.snackbar(context, 'Signing up',
+        backgroundColor: Colors.deepPurple.shade200);
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -27,9 +30,12 @@ class AuthService {
 
   Future<UserCredential?> signIn(
       BuildContext context, String email, String password) async {
+    ModalsHelper.snackbar(context, 'Signing in',
+        backgroundColor: Colors.deepPurple.shade200);
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -43,5 +49,25 @@ class AuthService {
 
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
+  }
+
+  Future<UserCredential?> signInAnonymously(BuildContext context) async {
+    ModalsHelper.snackbar(context, 'Signing in',
+        backgroundColor: Colors.deepPurple.shade200);
+    try {
+      final credential = await FirebaseAuth.instance.signInAnonymously();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      return credential;
+    } on FirebaseAuthException catch (exception) {
+      if (exception.code == 'operation-not-allowed') {
+        ModalsHelper.snackbar(context,
+            'Anonymous sign in is not available at the moment. Please try again later.');
+        return null;
+      }
+    } catch (exception) {
+      ModalsHelper.snackbar(
+          context, 'Cannot sign in anonymously. Please try again later.');
+      return null;
+    }
   }
 }

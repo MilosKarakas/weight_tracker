@@ -14,6 +14,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _signUpEmailController = TextEditingController();
   TextEditingController _signUpPasswordController = TextEditingController();
   FocusNode _signUpPasswordNode = FocusNode();
+  bool _signUpOngoing = false;
 
   @override
   void dispose() {
@@ -98,12 +99,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  void changeSignUpOngoing() {
+    setState(() {
+      _signUpOngoing = !_signUpOngoing;
+    });
+  }
+
   void signUp(BuildContext context) async {
     if (_signInForm.currentState != null &&
-        _signInForm.currentState!.validate()) {
+        _signInForm.currentState!.validate() &&
+        !_signUpOngoing) {
+      changeSignUpOngoing();
       final auth = serviceLocator<AuthService>();
-      final credential = auth.signUp(
+      final credential = await auth.signUp(
           context, _signUpEmailController.text, _signUpPasswordController.text);
+      changeSignUpOngoing();
       if (credential != null) {
         Navigator.pushAndRemoveUntil(
             context,

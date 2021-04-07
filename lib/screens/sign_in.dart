@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:weight_tracker/helpers/modals_helper.dart';
 import 'package:weight_tracker/screens/home.dart';
 import 'package:weight_tracker/screens/sign_up.dart';
 import 'package:weight_tracker/services/auth_service.dart';
@@ -16,6 +17,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController _signInEmailController = TextEditingController();
   TextEditingController _signInPasswordController = TextEditingController();
   FocusNode _signInPasswordNode = FocusNode();
+  bool _signInOrSignUpUnderOngoing = false;
 
   @override
   void dispose() {
@@ -115,7 +117,20 @@ class _SignInScreenState extends State<SignInScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SignUpScreen()));
-                        })
+                        }),
+                  TextSpan(
+                    text: ' / ',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(
+                      text: 'Sign In Anonymously',
+                      style: TextStyle(
+                          color: Colors.deepOrange,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.w600),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => signInAnonymosuly(context))
                 ])),
               ),
             )
@@ -125,18 +140,48 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  void changeSignInSignUpOngoing() {
+    setState(() {
+      _signInOrSignUpUnderOngoing = !_signInOrSignUpUnderOngoing;
+    });
+  }
+
   void signIn(BuildContext context) async {
     if (_signInForm.currentState != null &&
-        _signInForm.currentState!.validate()) {
+        _signInForm.currentState!.validate() &&
+        !_signInOrSignUpUnderOngoing) {
+      changeSignInSignUpOngoing();
       final auth = serviceLocator<AuthService>();
       final credential = await auth.signIn(
           context, _signInEmailController.text, _signInPasswordController.text);
+      changeSignInSignUpOngoing();
       if (credential != null) {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => HomeScreen()),
             (route) => false);
       }
+    } else if (_signInOrSignUpUnderOngoing) {
+      ModalsHelper.snackbar(
+          context, 'Wait until the previous operation is completed.');
+    }
+  }
+
+  void signInAnonymosuly(BuildContext context) async {
+    if (!_signInOrSignUpUnderOngoing) {
+      changeSignInSignUpOngoing();
+      final auth = serviceLocator<AuthService>();
+      final credential = await auth.signInAnonymously(context);
+      changeSignInSignUpOngoing();
+      if (credential != null) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+            (route) => false);
+      }
+    } else {
+      ModalsHelper.snackbar(
+          context, 'Wait until the previous operation is completed.');
     }
   }
 }

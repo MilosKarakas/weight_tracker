@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weight_tracker/helpers/modals_helper.dart';
 import 'package:weight_tracker/models/weight_model.dart';
 import 'package:weight_tracker/screens/sign_in.dart';
 import 'package:weight_tracker/services/auth_service.dart';
@@ -15,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool? _gaining;
+  bool _showFloatingActionButton = true;
 
   @override
   Widget build(BuildContext context) {
@@ -147,21 +149,30 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add new',
-        onPressed: () => addWeight(context),
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
+      floatingActionButton: _showFloatingActionButton
+          ? Builder(
+              builder: (context) => FloatingActionButton(
+                tooltip: 'Add new',
+                onPressed: () => addWeight(context),
+                child: Icon(Icons.add),
+              ),
+            )
+          : null, // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
+  void changeFloatingActionButtonVisibillity() {
+    setState(() {
+      _showFloatingActionButton = !_showFloatingActionButton;
+    });
+  }
+
   void addWeight(BuildContext context) async {
-    final dataService = serviceLocator<DataService>();
     TextEditingController _weightController = TextEditingController();
-    await showModalBottomSheet(
+    var controller = showBottomSheet(
         context: context,
-        isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) {
           return Container(
@@ -204,11 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: 120.0),
                     child: ElevatedButton(
-                        onPressed: () {
-                          dataService.addWeightEntry(WeightModel(DateTime.now(),
-                              double.parse(_weightController.text)));
-                          Navigator.pop(context);
-                        },
+                        onPressed: () =>
+                            addWeightEntry(context, _weightController.text),
                         child: Center(
                           child: Text('Submit'),
                         )),
@@ -221,6 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         });
+
+    changeFloatingActionButtonVisibillity();
+    controller.closed.then((value) {
+      changeFloatingActionButtonVisibillity();
+    });
   }
 
   void signOut(BuildContext context) async {
@@ -293,6 +306,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool? _gainingWeight(List<WeightModel> entries) {
     return entries.length < 2 ? null : entries[0].weight > entries[1].weight;
+  }
+
+  void addWeightEntry(BuildContext context, String weight) async {
+    final dataService = serviceLocator<DataService>();
+    double? weightValue = double.tryParse(weight);
+    if (weightValue == null) {
+      ModalsHelper.snackbar(
+          context, 'Please enter weight as decimal value of kilograms.');
+    } else {
+      bool success = await dataService
+          .addWeightEntry(WeightModel(DateTime.now(), weightValue));
+
+      if (!success) {
+        ModalsHelper.snackbar(
+            context, 'Could not add new entry. Please try again later.');
+      } else {
+        await ModalsHelper.snackbar(context, 'Entry saved.',
+            backgroundColor: Colors.deepPurple.shade200);
+
+        Navigator.pop(context);
+      }
+    }
   }
 
   Stream<List<WeightModel>> dataStream() {
