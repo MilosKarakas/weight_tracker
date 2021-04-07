@@ -1,6 +1,6 @@
-# weight_tracker
+# Weight Tracker
 
-Simple weight tracker.
+Simple weight tracker made with Firebase Auth and Cloud Firestore.
 
 ## Getting Started
 
