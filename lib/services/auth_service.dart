@@ -25,6 +25,8 @@ class AuthService {
     } catch (e) {
       print(e);
     }
+    ModalsHelper.snackbar(
+        context, 'Could not sign up. Please try again later.');
     return null;
   }
 
@@ -44,6 +46,8 @@ class AuthService {
         ModalsHelper.snackbar(context, 'Password is incorrect');
       }
     }
+    ModalsHelper.snackbar(
+        context, 'Could not sign in. Please try again later.');
     return null;
   }
 
@@ -69,5 +73,8 @@ class AuthService {
           context, 'Cannot sign in anonymously. Please try again later.');
       return null;
     }
+    ModalsHelper.snackbar(
+        context, 'Cannot sign in anonymously. Please try again later.');
+    return null;
   }
 }
