@@ -20,7 +20,7 @@ class AuthService {
       if (e.code == 'email-already-in-use') {
         ModalsHelper.snackbar(context, 'User with this email already exists');
       } else {
-        ModalsHelper.snackbar(context, 'Erros occurred, please try again');
+        ModalsHelper.snackbar(context, 'Errors occurred, please try again');
       }
     } catch (e) {
       print(e);
